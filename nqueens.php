@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * N-Queens problem: put N Queens on a chess board NxN
  * sized such that they aren't at risk of capture.
@@ -20,7 +23,7 @@ class Queens
      * These prevents the need to manually check is row, column or diagonal.
      * Much quicker!
      *
-     * @var bool[][]
+     * @var mixed
      */
     private $used = [
         'row' => [],
@@ -48,7 +51,7 @@ class Queens
         $this->used['cells'] = array_fill(0, $size, array_fill(0, $size, 0));
     }
 
-    public function optimize()
+    public function optimize(): void
     {
         if ($this->size < 19) {
             return;
@@ -59,18 +62,19 @@ class Queens
         $this->assign($this->size - 3, 4, true);
         $this->assign($this->size - 4, 1, true);
         $this->assign($this->size - 5, 3, true);
+        $this->assign((int)($this->size / 2), $this->size - 1, true);
     }
 
-    public function solve()
+    public function solve(): bool
     {
-        return $this->doSolve(count($this->used['row']), 0);
+        return $this->solveQueen(0, 0);
     }
 
-    private function doSolve(int $queenNum, int $row): bool
+    private function solveQueen(int $queenNum, int $row): bool
     {
         if (($this->used['row'][$row] ?? false) === true) {
             if(($queenNum === $this->size - 1)
-                || $this->doSolve($queenNum + 1, $row + 1) === true
+                || $this->solveQueen($queenNum + 1, $row + 1) === true
             ) {
                 return true;
             }
@@ -94,16 +98,16 @@ class Queens
             if ($this->used['score'] !== false) {
                 $options[$col] = $this->used['score'];
             }
-            $this->assign($row, $col, false);
+            $this->assign($row, $col, false, false);
         }
 
         asort($options);
 
         foreach ($options as $col => $score) {
-            $this->assign($row, $col, true);
+            $this->assign($row, $col, true, false);
             // If last queen or subsequent queens have been placed, return
             if(($queenNum === $this->size - 1)
-                || $this->doSolve($queenNum + 1, $row + 1) === true
+                || $this->solveQueen($queenNum + 1, $row + 1) === true
             ) {
                 return true;
             }
@@ -111,13 +115,13 @@ class Queens
             // otherwise, if we get here we've backtracked and have to try replacing this queen
             $this->stats['backtracks']++;
 
-            $this->assign($row, $col, false);
+            $this->assign($row, $col, false, false);
         }
 
         return false;
     }
 
-    public function assign(int $row, int $col, bool $value): void
+    public function assign(int $row, int $col, bool $value, bool $stats = true): void
     {
         $newValue = $value ? $col : null;
         if ($this->result[$row] === $newValue) {
@@ -177,7 +181,12 @@ class Queens
             }
         }
 
+        if ($stats === false) {
+            return;
+        }
+
         for ($i = 0; $i < $this->size; $i++) {
+            /** These check is not required because we already know the row is safe.
             if (!in_array($i, $this->result, true) === null) {
                 $usedXs = count(array_filter($this->used['cells'][$i]));
                 if ($usedXs === $this->size) {
@@ -185,6 +194,7 @@ class Queens
                     break;
                 }
             }
+            **/
 
             if ($this->result[$i] === null) {
                 $usedYs = [];
@@ -207,21 +217,21 @@ class Queens
     public function display()
     {
         $this->stats['queens-placed'] = 0;
-        $sep = str_repeat('-', $this->size * 4 + 1);
         for($row = 0; $row < $this->size; $row++)
         {
-            echo $sep, PHP_EOL;
+            //echo $sep, PHP_EOL;
+
             for($col = 0; $col < $this->size; $col++)
             {
-                echo '| ';
+                echo '|';
                 $this->stats['queens-placed'] += (int)($this->result[$row] === $col);
-                //echo $this->result[$row] === $col ? 'Q ' : ((int)$this->used['cells'][$col][$row]).' '; // Dev
-                echo $this->result[$row] === $col ? 'Q ' : '  ';
+                //echo $this->result[$row] === $col ? '♛' : ((int)$this->used['cells'][$col][$row]).''; // Dev
+                echo $this->result[$row] === $col ? '♛' : ' ';
             }
 
             echo '|', PHP_EOL;
         }
-        echo $sep, PHP_EOL;
+        echo PHP_EOL;
     }
 
     public function displayStats()
@@ -234,7 +244,7 @@ class Queens
 }
 
 // Run main ...
-$queens = new Queens($_SERVER['argv'][1]);
+$queens = new Queens((int)$_SERVER['argv'][1]);
 $before = microtime(true);
 $queens->optimize();
 $queens->solve();
