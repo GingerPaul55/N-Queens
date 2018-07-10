@@ -63,6 +63,18 @@ class Queens
         $this->assign($this->size - 4, 1, true);
         $this->assign($this->size - 5, 3, true);
         $this->assign((int)($this->size / 2), $this->size - 1, true);
+
+        if ($this->size < 36) {
+            return;
+        }
+
+        $stepRoot = (int)($this->size / 6);
+        $offset = 2;
+        while ($offset < $this->size && $this->stepRoot < $this->size && $this->isFree($stepRoot, $this->size - $offset)) {
+            $this->assign($stepRoot, $this->size - $offset, true);
+            $stepRoot+= 2;
+            $offset++;
+        }
     }
 
     public function solve(): bool
@@ -70,8 +82,44 @@ class Queens
         return $this->solveQueen(0, 0);
     }
 
+    private function isFree(int $row, int $col): bool
+    {
+        $down = $this->size - 1 - $row + $col;
+        $up = $row + $col;
+        if(($this->used['column'][$col] ?? false) === true
+            || ($this->used['down'][$down] ?? false) === true
+            || ($this->used['up'][$up] ?? false) === true
+        ) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private function getMoves(int $row): array
+    {
+        $moves = [];
+        for($col = 0; $col < $this->size; $col++) {
+            if ($this->isFree($row, $col) === false) {
+                continue;
+            }
+
+            // if this cell is allowed, set the queen here
+            $this->assign($row, $col, true);
+            if ($this->used['score'] !== false) {
+                $moves[$col] = $this->used['score'];
+            }
+            $this->assign($row, $col, false, false);
+        }
+
+        asort($moves);
+
+        return $moves;
+    }
+
     private function solveQueen(int $queenNum, int $row): bool
     {
+        // Check if this queen is already solved.
         if (($this->used['row'][$row] ?? false) === true) {
             if(($queenNum === $this->size - 1)
                 || $this->solveQueen($queenNum + 1, $row + 1) === true
@@ -80,30 +128,8 @@ class Queens
             }
             return false;
         }
-        $options = [];
-        for($col = 0; $col < $this->size; $col++) {
-            $down = $this->size - 1 - $row + $col;
-            $up = $row + $col;
 
-            // This cell is in use by another Queen.
-            if(($this->used['column'][$col] ?? false) === true
-                || ($this->used['down'][$down] ?? false) === true
-                || ($this->used['up'][$up] ?? false) === true
-            ) {
-                continue;
-            }
-
-            // if this cell is allowed, set the queen here
-            $this->assign($row, $col, true);
-            if ($this->used['score'] !== false) {
-                $options[$col] = $this->used['score'];
-            }
-            $this->assign($row, $col, false, false);
-        }
-
-        asort($options);
-
-        foreach ($options as $col => $score) {
+        foreach ($this->getMoves($row) as $col => $score) {
             $this->assign($row, $col, true, false);
             // If last queen or subsequent queens have been placed, return
             if(($queenNum === $this->size - 1)
@@ -127,6 +153,11 @@ class Queens
         if ($this->result[$row] === $newValue) {
             return;
         }
+
+        // Debug only.
+        //if ($value === true && !$this->isFree($row, $col)) {
+        //    throw new \Exception('Cannot assigned queen to '.$row.' '.$col.' as it\'s not a free square');
+        //}
         $difference = $value ? 1 : -1;
         $this->stats['assignments']++;
         $this->result[$row] = $newValue;
@@ -196,6 +227,7 @@ class Queens
             }
             **/
 
+            // If a queen is placed on here then ignore it.
             if ($this->result[$i] === null) {
                 $usedYs = [];
                 for ($ii = 0; $ii < $this->size; $ii++) {
