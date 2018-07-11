@@ -7,7 +7,7 @@ error_reporting(E_ALL & ~E_NOTICE);
 $ns = [
     1, 2, 3, 4, 5, 6, 7, 8,   // Easy
     12, 14, 16, 18, 19, 21,   // Medium
-    37, 42, 51, 63//, 100, 112, // Hard
+    37, 42, 51, 63, 100//, 112, // Hard
     // Impossible
 ];
 
