@@ -1,0 +1,19 @@
+{
+	"name": "GingerPaul55/nqueens",
+	"description": "Fast n-queens solver written in PHP",
+	"bin": [
+		"bin/run.php"
+	],
+	"minimum-stability": "dev",
+	"prefer-stable": true,
+	"require": {
+		"php": "~7.2"
+	},
+	"autoload": {
+		"psr-4": {"NQueens\\": ["src/"]}
+	},
+	"config": {
+		"sort-packages": true
+	}
+}
+
