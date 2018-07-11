@@ -2,7 +2,7 @@
 
 require __DIR__.'/../vendor/autoload.php';
 
-//error_reporting(E_ALL);
+error_reporting(E_ALL & ~E_NOTICE);
 
 // Run main ...
 $queens = new NQueens\NQueens((int)$_SERVER['argv'][1]);

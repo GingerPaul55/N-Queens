@@ -202,7 +202,9 @@ class NQueens
         $this->used['down'][$this->size - 1 - $row + $col] = $value;
         $this->used['up'][$row + $col] = $value;
 
-        $cells = [];
+        $cells = [
+            $col => array_fill(0, $this->size, 0),
+        ];
         for ($i = 0; $i < $this->size; $i++) {
             $cells[$col][$i] += $difference;
             $cells[$i][$row] += $difference;
@@ -297,7 +299,7 @@ class NQueens
     public function getStats(): array
     {
         $this->stats['queens-placed'] = $this->used['total'];
-        
+
         return $this->stats;
     }
 
