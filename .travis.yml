@@ -3,7 +3,7 @@ php:
   - "7.2"
   - nightly
 before_script:
-  - phpenv config-rm xdebug.ini
+  - 'phpenv config-rm xdebug.ini | echo Xdebug not installed'
   - composer self-update
   - composer install --prefer-source --no-interaction --dev
 script: php test/run.php
