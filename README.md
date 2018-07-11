@@ -1,4 +1,5 @@
-# N-Queens problem solved in PHP with recursion, backtracking and 
+[![Build Status](https://travis-ci.org/GingerPaul55/N-Queens.svg?branch=master)](https://travis-ci.org/GingerPaul55/N-Queens)
+# N-Queens problem solved in PHP with recursion, backtracking and heuristic.
 
 For 90 Queens, output is:
 
