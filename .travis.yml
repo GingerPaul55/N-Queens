@@ -1,0 +1,7 @@
+language: php
+php:
+  - nightly
+before_script:
+  - composer self-update
+  - composer install --prefer-source --no-interaction --dev
+script: php test/run.php
