@@ -43,7 +43,6 @@ class NQueens
     private $stats = [
         'assignments' => 0,
         'backtracks' => 0,
-        'queens-placed' => 0,
     ];
 
     public function __construct(int $size)
@@ -70,9 +69,17 @@ class NQueens
             return;
         }
 
+        $jumpLimit = 6;
+        if ($this->size > 95) {
+            $jumpLimit = 12;
+        }
+        if ($this->size > 110) {
+            $jumpLimit = 16;
+        }
+
         $stepRoot = (int)($this->size / 6);
         $offset = 2;
-        while ($offset < 6 && $offset < $this->size && $stepRoot < $this->size && $this->isFree($stepRoot, $this->size - $offset)) {
+        while ($offset < $jumpLimit && $offset < $this->size && $stepRoot < $this->size && $this->isFree($stepRoot, $this->size - $offset)) {
             $this->assign($stepRoot, $this->size - $offset, true);
             $stepRoot+= 2;
             $offset++;
@@ -271,15 +278,13 @@ class NQueens
     }
 
     // Rudimentary printing method
-    public function display()
+    public function display(): void
     {
-        $this->stats['queens-placed'] = 0;
         for($row = 0; $row < $this->size; $row++)
         {
             for($col = 0; $col < $this->size; $col++)
             {
                 echo '|';
-                $this->stats['queens-placed'] += (int)($this->result[$row] === $col);
                 //echo $this->result[$row] === $col ? '♛' : ((int)$this->used['cells'][$col][$row]).''; // Dev
                 echo $this->result[$row] === $col ? '♛' : ' ';
             }
@@ -289,10 +294,17 @@ class NQueens
         echo PHP_EOL;
     }
 
-    public function displayStats()
+    public function getStats(): array
+    {
+        $this->stats['queens-placed'] = $this->used['total'];
+        
+        return $this->stats;
+    }
+
+    public function displayStats(): void
     {
         echo '== Stats ==', PHP_EOL;
-        foreach ($this->stats as $key => $value) {
+        foreach ($this->getStats() as $key => $value) {
             echo $key, ': ', number_format($value), PHP_EOL;
         }
     }
